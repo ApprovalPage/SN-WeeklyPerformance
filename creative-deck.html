@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Space Needle + CGG — Creative Review</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',-apple-system,sans-serif;background:#09090F;color:#fff;min-height:100vh;display:flex;flex-direction:column}
+  button{cursor:pointer;font-family:inherit}
+  textarea,input{font-family:inherit}
+  a{color:#38BDF8}
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:#0E0E18}
+  ::-webkit-scrollbar-thumb{background:#2D2D4A;border-radius:3px}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
+  .modal-box{background:#0E0E18;border:1px solid #2D2D4A;border-radius:14px;width:100%;max-width:620px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden}
+  .modal-header{padding:16px 20px;border-bottom:1px solid #1A1A2A;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+  .modal-body{padding:20px;overflow-y:auto;flex:1}
+  .modal-footer{padding:14px 20px;border-top:1px solid #1A1A2A;display:flex;gap:8px;flex-shrink:0}
+  .copy-btn{flex:1;padding:10px 0;background:#0C2240;border:1px solid #1E3A5F;border-radius:8px;color:#38BDF8;font-size:12px;font-weight:600}
+  .copy-btn:hover{background:#1E3A5F}
+  .close-btn{padding:10px 16px;background:#111120;border:1px solid #1A1A2A;border-radius:8px;color:#4B5563;font-size:12px}
+  .feedback-block{background:#111120;border-radius:8px;padding:14px;margin-bottom:10px;border-left:3px solid #1E3A5F}
+  .feedback-block.approved{border-left-color:#16A34A}
+  .feedback-block.revision{border-left-color:#DC2626}
+  .feedback-block.pending{border-left-color:#374151}
+</style>
+</head>
+<body>
+<script>
+const ROUND={number:1,date:"February 27, 2026"};
+const PLAN=[
+  {id:"meta",partner:"Meta",color:"#1877F2",icon:"📘",description:"Video | Static | Carousel",flight:"Feb – Oct (ongoing)",impressions:"50,000,000",investment:"$500,000",adSets:["Seattle Bookers (Adara)","Lookalike (LAL)","Locals"],placements:[
+    {id:"meta-video",name:"Video Ad",format:"Video (:15 / :30)",specs:"1080×1920 (Stories) / 1920×1080 (Feed)",rotation:true,creatives:[{id:"mv1",version:"V1",product:"Season Pass — Never the Same"},{id:"mv2",version:"V2",product:"Combo — Spring Break"},{id:"mv3",version:"V3",product:"Chihuly Nights"}]},
+    {id:"meta-static",name:"Static Image Ad",format:"Static Image",specs:"1080×1080 / 1200×628",rotation:true,creatives:[{id:"ms1",version:"V1",product:"Season Pass — Never the Same"},{id:"ms2",version:"V2",product:"Pint & a Pie"}]},
+    {id:"meta-carousel",name:"Carousel Ad",format:"Carousel (3–5 cards)",specs:"1080×1080 per card",rotation:false,creatives:[{id:"mc1",version:"V1",product:"Multi-offer Carousel (Combo / Chihuly / F&B)"}]}
+  ]},
+  {id:"expedia",partner:"Expedia",color:"#00A8E0",icon:"✈️",description:"Display · Native · Partner Gallery · Landing Page",flight:"Feb – Oct (ongoing)",impressions:"10,000,000",investment:"$200,000",adSets:["Booked Travel to Seattle","Travel Intender — Seattle","FIFA / Alaska Cruise (Q2/Q3)"],placements:[
+    {id:"exp-display",name:"Display",format:"Banner",specs:"300×250, 728×90, 160×600",rotation:true,creatives:[{id:"ed1",version:"V1",product:"Season Pass / Combo — Evergreen"},{id:"ed2",version:"V2",product:"FIFA — Summer Push"}]},
+    {id:"exp-native",name:"Native",format:"Native Card",specs:"Headline + Image + CTA",rotation:false,creatives:[{id:"en1",version:"V1",product:"Combo — Best Value"}]},
+    {id:"exp-marquee",name:"Native Marquee Cards",format:"Homepage / Search Marquee",specs:"1200×628 hero image",rotation:true,creatives:[{id:"em1",version:"V1",product:"Season Pass — Spring"},{id:"em2",version:"V2",product:"Chihuly Nights"}]},
+    {id:"exp-gallery",name:"Partner Gallery",format:"Gallery Tile",specs:"400×300",rotation:false,creatives:[{id:"eg1",version:"V1",product:"Space Needle + CGG — Combined Offer"}]}
+  ]},
+  {id:"stackadapt",partner:"StackAdapt",color:"#6C3FC5",icon:"📊",description:"OLV · Native · High Impact Display · Remarketing",flight:"Feb – Oct",impressions:"20,000,000",investment:"$150,000",adSets:["Adara — Travelers in next 60 days","First Party LAL","Premium Signals (activity seekers)"],placements:[
+    {id:"sa-olv",name:"OLV (Online Video)",format:"Pre-roll / Mid-roll Video",specs:"1920×1080, :15–:30",rotation:true,creatives:[{id:"sav1",version:"V1",product:"Season Pass — Awareness"},{id:"sav2",version:"V2",product:"Chihuly — Awareness Spring"}]},
+    {id:"sa-native",name:"Native",format:"Native Article / In-feed",specs:"600×400 + headline",rotation:false,creatives:[{id:"san1",version:"V1",product:"Combo — Best Value"}]},
+    {id:"sa-himp",name:"High Impact Display",format:"Interstitial / Skin",specs:"Full-page / 970×250",rotation:false,creatives:[{id:"sah1",version:"V1",product:"FIFA Summer Takeover"}]},
+    {id:"sa-display",name:"Display",format:"Banner",specs:"300×250, 728×90",rotation:true,creatives:[{id:"sad1",version:"V1",product:"Evergreen Retargeting"},{id:"sad2",version:"V2",product:"Chihuly Nights — Fall"}]},
+    {id:"sa-rmkt",name:"Remarketing",format:"Display / Native",specs:"All standard sizes",rotation:false,creatives:[{id:"sar1",version:"V1",product:"Abandoned Visitor Retargeting"}]}
+  ]},
+  {id:"mntn",partner:"MNTN (CTV)",color:"#E63946",icon:"📺",description:"Performance CTV",flight:"Feb – Sep",impressions:"4,000,000",investment:"$100,000",adSets:["Adara Bookers — National","LAL + Retargeting from 1P Data — Regional","Social Explorers / Re-Explorers — Regional"],placements:[
+    {id:"mntn-ctv",name:"CTV :30 Spot",format:"Video :30",specs:"1920×1080, H.264",rotation:true,creatives:[{id:"tv1",version:"V1",product:"Season Pass — Brand"},{id:"tv2",version:"V2",product:"Combo — Summer Peak"}]}
+  ]},
+  {id:"mirrors",partner:"Mirrors AI / YouTube",color:"#FF0000",icon:"▶️",description:"Contextual YouTube via Mirrors AI",flight:"Feb – Oct",impressions:"TBD",investment:"TBD",adSets:["Space Needle Content Takeover","Conquest Seattle Sights & Activities","Seattle Travel Tips / Must-Do's"],placements:[
+    {id:"yt-trueview",name:"TrueView In-Stream",format:"Skippable Video :15+",specs:"1920×1080, companion 300×60",rotation:true,creatives:[{id:"ytv1",version:"V1",product:"Season Pass — Brand/Awareness"},{id:"ytv2",version:"V2",product:"Chihuly — Spring Awareness"}]},
+    {id:"yt-bumper",name:"Bumper Ad",format:"Non-skip :06",specs:"1920×1080",rotation:false,creatives:[{id:"ytb1",version:"V1",product:"Space Needle — Iconic Moment"}]}
+  ]},
+  {id:"spotify",partner:"Spotify",color:"#1DB954",icon:"🎵",description:"Audio / Podcast / Video",flight:"Feb – Oct",impressions:"5,000,000",investment:"$100,000",adSets:["WA State","Drive Markets (OR, MT, ID)","Short Fly Markets (CA, UT, CO)"],placements:[
+    {id:"spot-audio",name:"Audio :30",format:"Audio Ad + companion display",specs:":30 audio + 640×640 companion",rotation:true,creatives:[{id:"spa1",version:"V1",product:"Season Pass — Generic"},{id:"spa2",version:"V2",product:"Chihuly Nights"}]},
+    {id:"spot-video",name:"Video Takeover",format:"Video :15–:30",specs:"1080×1080 / 1920×1080",rotation:false,creatives:[{id:"spv1",version:"V1",product:"Space Needle — Summer"}]}
+  ]},
+  {id:"seattletimes",partner:"Seattle Times",color:"#1A6B3A",icon:"📰",description:"Display · Social Display · Branded Content · Print",flight:"Year-round",impressions:"36,200,000",investment:"$150,000",adSets:["Out-of-towners (60% of pageviews)","Locals (Seattle + WA State)","FIFA adjacencies (Q2)"],placements:[
+    {id:"st-display",name:"Display + Social Display",format:"Banner / Social",specs:"300×250, 728×90, 1200×628",rotation:true,creatives:[{id:"std1",version:"V1",product:"Evergreen / Seasonal Rotation"}]},
+    {id:"st-ent",name:"Entertainment Takeover + Ticket Top Picks",format:"Homepage Takeover",specs:"Full-page + 970×250 + 300×250",rotation:false,creatives:[{id:"ste1",version:"V1 (Combo)",product:"Launch Takeover — Q1"},{id:"ste2",version:"V2 (Combo)",product:"Launch Takeover — Q2"},{id:"ste3",version:"V3 (Combo)",product:"Launch Takeover — Fall"}]},
+    {id:"st-weekend",name:"Weekend Plus (Print)",format:"Print — Front page",specs:"Print specs TBD",rotation:false,creatives:[{id:"stw1",version:"V1",product:"Seasonal Print Ad (50 wks)"}]},
+    {id:"st-branded",name:"Branded Content Hub",format:"Custom Editorial",specs:"3–4 articles + social amplification",rotation:false,creatives:[{id:"stb1",version:"Article 1",product:"Find Your Mood"},{id:"stb2",version:"Article 2",product:"Seattle's Golden Hour at 605"},{id:"stb3",version:"Article 3",product:"Weather Chasers"}]}
+  ]},
+  {id:"shipmate",partner:"Shipmate / Cruiseline.com",color:"#0077B6",icon:"🚢",description:"Digital placements targeting Alaska cruise travelers",flight:"Q2 – Q3",impressions:"550,000",investment:"$25,000",adSets:["Alaska Cruise Travelers","Ship/Port-specific targeting","Pre-cruise (days before sailing)"],placements:[
+    {id:"ship-email",name:"Email Sponsorship",format:"HTML Email Banner",specs:"600px wide, 200px tall",rotation:false,creatives:[{id:"she1",version:"V1",product:"Space Needle — Port Day Activity"}]},
+    {id:"ship-app",name:"In-App Persistent Placement",format:"In-App Banner / Native",specs:"320×50 / 300×250",rotation:false,creatives:[{id:"sha1",version:"V1",product:"Space Needle + CGG — Must-Do Seattle"}]},
+    {id:"ship-precruise",name:"Pre-Cruise Email",format:"HTML Email Feature",specs:"600px wide, hero image",rotation:false,creatives:[{id:"shp1",version:"V1",product:"Pre-Arrival Promo"}]}
+  ]},
+  {id:"clearchannel",partner:"Clear Channel (OOH)",color:"#E76F51",icon:"🏙️",description:"FIFA adjacencies OOH",flight:"Q2 – Q3",impressions:"500,000",investment:"$110,000",adSets:["Out-of-home — general public"],placements:[
+    {id:"cc-ooh",name:"OOH Boards",format:"Static / Digital OOH",specs:"14×48 (billboard), various",rotation:false,creatives:[{id:"cco1",version:"V1",product:"FIFA + Space Needle — Seattle Center"}]}
+  ]},
+  {id:"seatac",partner:"SEA-TAC Airport",color:"#457B9D",icon:"🛬",description:"8-week arrivals presence",flight:"Peak 8 weeks (TBD)",impressions:"TBD",investment:"TBD",adSets:["Arriving international + domestic travelers"],placements:[
+    {id:"sea-floor",name:"Floor Clings (×4)",format:"Floor Cling",specs:"Custom circular, ~4ft diameter",rotation:false,creatives:[{id:"flr1",version:"V1",product:"Space Needle — Welcome to Seattle"}]},
+    {id:"sea-esc",name:"Escalator Wraps (×8)",format:"Large Format Print",specs:"Custom escalator dimensions",rotation:false,creatives:[{id:"esc1",version:"V1",product:"Space Needle + CGG — Can't Miss"}]}
+  ]},
+  {id:"influencer",partner:"Influencer",color:"#E9C46A",icon:"⭐",description:"Creator + Expedia Travel Ambassador program",flight:"Ongoing",impressions:"TBD",investment:"$40,000",adSets:["Gamers","Sports stars","Musicians","Lifestyle / Travel"],placements:[
+    {id:"inf-content",name:"Creator Content",format:"Organic + Paid Social Video/Post",specs:"Platform-native (IG, TikTok, YouTube)",rotation:true,creatives:[{id:"inc1",version:"Brief 1",product:"Space Needle Visit — Organic"},{id:"inc2",version:"Brief 2",product:"Chihuly Garden — Event-tied"}]}
+  ]}
+];
+
+let state={
+  selectedId:PLAN[0].id,productFilter:"all",clientMode:false,
+  round:{...ROUND},plan:JSON.parse(JSON.stringify(PLAN)),
+  creatives:{},commentOpen:null,commentDraft:"",replaceOpen:null,showFeedbackModal:false,copied:false
+};
+PLAN.forEach(p=>p.placements.forEach(pl=>pl.creatives.forEach(c=>{
+  state.creatives[c.id]={fileUrl:null,fileType:null,fileName:null,comment:"",agencyNote:"",status:"pending"};
+})));
+
+function partner(){return state.plan.find(p=>p.id===state.selectedId);}
+function allProducts(){const p=partner();return["all",...new Set(p.placements.flatMap(pl=>pl.creatives.map(c=>c.product)))];}
+function partnerProgress(p){
+  const cr=p.placements.flatMap(pl=>pl.creatives.map(c=>state.creatives[c.id]));
+  return{total:cr.filter(c=>c.status!=="n/a").length,done:cr.filter(c=>["uploaded","approved","revision"].includes(c.status)).length,approved:cr.filter(c=>c.status==="approved").length};
+}
+function globalStats(){
+  const all=Object.values(state.creatives);
+  return{total:all.filter(c=>c.status!=="n/a").length,uploaded:all.filter(c=>["uploaded","approved","revision"].includes(c.status)).length,approved:all.filter(c=>c.status==="approved").length};
+}
+
+// Build compiled feedback string
+function buildFeedbackText(){
+  const lines=[];
+  lines.push(`CREATIVE REVIEW FEEDBACK — Round ${state.round.number}`);
+  lines.push(`Date: ${state.round.date}`);
+  lines.push(`Prepared for: PB&`);
+  lines.push("═".repeat(52));
+  let hasAny=false;
+  state.plan.forEach(p=>{
+    const cards=[];
+    p.placements.forEach(pl=>{
+      pl.creatives.forEach(c=>{
+        const cr=state.creatives[c.id];
+        if(cr.status==="n/a")return;
+        const acted=cr.status==="approved"||cr.status==="revision"||cr.comment;
+        if(acted){
+          hasAny=true;
+          const statusLabel=cr.status==="approved"?"✓ APPROVED":cr.status==="revision"?"✗ NEEDS REVISION":"◌ NOT YET REVIEWED";
+          cards.push(`  ${pl.name} · ${c.version} — ${c.product}\n  Status: ${statusLabel}${cr.comment?"\n  Feedback: "+cr.comment:""}`);
+        }
+      });
+    });
+    if(cards.length){
+      lines.push(`\n${p.icon} ${p.partner.toUpperCase()}`);
+      lines.push("─".repeat(40));
+      cards.forEach(c=>lines.push(c));
+    }
+  });
+  if(!hasAny){
+    lines.push("\nNo feedback recorded yet.");
+    lines.push("Please review assets above, then use the Approve or Revise buttons on each card.");
+  }
+  lines.push("\n"+"═".repeat(52));
+  lines.push("Please reply to this email with any additional context.");
+  return lines.join("\n");
+}
+
+const STATUS={
+  pending:{label:"Awaiting Asset",color:"#6B7280",bg:"#1F1F2E"},
+  uploaded:{label:"Under Review",color:"#0284C7",bg:"#0C2A3F"},
+  approved:{label:"Approved ✓",color:"#16A34A",bg:"#0C2A1A"},
+  revision:{label:"Needs Revision",color:"#DC2626",bg:"#2A0C0C"},
+  "n/a":{label:"N/A",color:"#4B5563",bg:"#111118"},
+};
+
+function el(tag,attrs={}){
+  const e=document.createElement(tag);
+  Object.entries(attrs).forEach(([k,v])=>{
+    if(k==="style")e.style.cssText=v;
+    else if(k in e)e[k]=v;
+    else e.setAttribute(k,v);
+  });
+  return e;
+}
+
+function inlineEdit(node,current,onSave){
+  const inp=document.createElement("input");
+  inp.value=current;
+  inp.style.cssText="background:#1A1A2A;border:1px solid #3B3B5A;border-radius:4px;color:#fff;padding:1px 5px;font-size:inherit;outline:none;width:140px";
+  node.replaceWith(inp);inp.focus();
+  const done=()=>onSave(inp.value);
+  inp.onblur=done;inp.onkeydown=e=>{if(e.key==="Enter")done();if(e.key==="Escape")inp.replaceWith(node);};
+}
+
+function renderModal(){
+  const existing=document.querySelector(".modal-overlay");
+  if(existing)existing.remove();
+  if(!state.showFeedbackModal)return;
+
+  const text=buildFeedbackText();
+  const overlay=el("div",{className:"modal-overlay"});
+  const box=el("div",{className:"modal-box"});
+
+  // Header
+  const mh=el("div",{className:"modal-header"});
+  const mhL=el("div");
+  const mhT=el("div",{style:"font-size:14px;font-weight:700;color:#fff"});mhT.textContent="📋 Your Feedback Summary";
+  const mhS=el("div",{style:"font-size:11px;color:#4B5563;margin-top:2px"});mhS.textContent="Copy this and paste it into your reply email to PB&";
+  mhL.appendChild(mhT);mhL.appendChild(mhS);
+  const closeX=el("button",{style:"background:none;border:none;color:#4B5563;font-size:18px;padding:4px 8px;line-height:1"});closeX.textContent="×";
+  closeX.onclick=()=>{state.showFeedbackModal=false;renderModal();};
+  mh.appendChild(mhL);mh.appendChild(closeX);box.appendChild(mh);
+
+  // Body — visual cards
+  const mb=el("div",{className:"modal-body"});
+  const instruc=el("div",{style:"font-size:11px;color:#6B7280;margin-bottom:14px;padding:10px 12px;background:#111120;border-radius:8px;line-height:1.5"});
+  instruc.textContent="Review your feedback below, then hit \"Copy Feedback\" at the bottom and paste it directly into an email reply to your PB& contact.";
+  mb.appendChild(instruc);
+
+  let hasAny=false;
+  state.plan.forEach(p=>{
+    const cards=[];
+    p.placements.forEach(pl=>{
+      pl.creatives.forEach(c=>{
+        const cr=state.creatives[c.id];
+        if(cr.status==="n/a")return;
+        if(cr.status==="approved"||cr.status==="revision"||cr.comment){
+          hasAny=true;cards.push({pl,c,cr});
+        }
+      });
+    });
+    if(!cards.length)return;
+    const ph=el("div",{style:"font-size:11px;font-weight:700;color:#9CA3AF;margin-bottom:6px;margin-top:14px;display:flex;align-items:center;gap:6px"});
+    const phIco=el("span");phIco.textContent=p.icon;
+    const phNm=el("span",{style:`color:${p.color}`});phNm.textContent=p.partner;
+    ph.appendChild(phIco);ph.appendChild(phNm);mb.appendChild(ph);
+    cards.forEach(({pl,c,cr})=>{
+      const cls="feedback-block "+(cr.status==="approved"?"approved":cr.status==="revision"?"revision":"pending");
+      const fb=el("div",{className:cls});
+      const ft=el("div",{style:"font-size:11px;font-weight:600;color:#E5E7EB;margin-bottom:4px"});
+      ft.textContent=`${pl.name} · ${c.version} — ${c.product}`;
+      const fs=el("div",{style:`font-size:10px;font-weight:600;color:${cr.status==="approved"?"#4ADE80":cr.status==="revision"?"#F87171":"#9CA3AF"}`});
+      fs.textContent=cr.status==="approved"?"✓ Approved":cr.status==="revision"?"✗ Needs Revision":"◌ No decision yet";
+      fb.appendChild(ft);fb.appendChild(fs);
+      if(cr.comment){
+        const fn=el("div",{style:"font-size:10px;color:#9CA3AF;margin-top:5px;padding-top:5px;border-top:1px solid #1A1A2A"});
+        fn.textContent="Note: "+cr.comment;fb.appendChild(fn);
+      }
+      mb.appendChild(fb);
+    });
+  });
+
+  if(!hasAny){
+    const empty=el("div",{style:"text-align:center;padding:30px 20px;color:#374151"});
+    const ei=el("div",{style:"font-size:28px;margin-bottom:8px"});ei.textContent="🖼️";
+    const et=el("div",{style:"font-size:12px"});et.textContent="No feedback recorded yet. Go back and use the Approve or Revise buttons on each asset card.";
+    empty.appendChild(ei);empty.appendChild(et);mb.appendChild(empty);
+  }
+  box.appendChild(mb);
+
+  // Footer
+  const mf=el("div",{className:"modal-footer"});
+  const copyBtn=el("button",{className:"copy-btn"});
+  copyBtn.textContent=state.copied?"✓ Copied to clipboard!":"📋 Copy Feedback to Clipboard";
+  copyBtn.onclick=()=>{
+    navigator.clipboard.writeText(text).then(()=>{
+      state.copied=true;renderModal();
+      setTimeout(()=>{state.copied=false;renderModal();},2500);
+    }).catch(()=>{
+      // fallback
+      const ta=document.createElement("textarea");
+      ta.value=text;ta.style.position="fixed";ta.style.opacity="0";
+      document.body.appendChild(ta);ta.select();document.execCommand("copy");
+      document.body.removeChild(ta);
+      state.copied=true;renderModal();
+      setTimeout(()=>{state.copied=false;renderModal();},2500);
+    });
+  };
+  if(state.copied)copyBtn.style.background="#0C2A1A",copyBtn.style.color="#4ADE80",copyBtn.style.borderColor="#16A34A";
+  const closeBtn=el("button",{className:"close-btn"});closeBtn.textContent="Close";
+  closeBtn.onclick=()=>{state.showFeedbackModal=false;renderModal();};
+  mf.appendChild(copyBtn);mf.appendChild(closeBtn);box.appendChild(mf);
+
+  overlay.appendChild(box);
+  overlay.onclick=e=>{if(e.target===overlay){state.showFeedbackModal=false;renderModal();}};
+  document.body.appendChild(overlay);
+}
+
+function render(){
+  // Remove old body content but keep modal
+  const modal=document.querySelector(".modal-overlay");
+  document.body.innerHTML="";
+  if(modal)document.body.appendChild(modal);
+
+  const p=partner();
+  const stats=globalStats();
+  const cm=state.clientMode;
+
+  // Header
+  const hdr=el("div",{style:"background:#0E0E18;border-bottom:1px solid #1E1E2E;padding:12px 22px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:12px"});
+  const hL=el("div",{style:"display:flex;align-items:center;gap:12px"});
+  const logo=el("div",{style:"width:34px;height:34px;background:linear-gradient(135deg,#FF6B6B,#4ECDC4);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px"});logo.textContent="🗼";
+  const hTitles=el("div");
+  const hT=el("div",{style:"font-weight:700;font-size:14px"});hT.textContent="Space Needle + CGG — 2026 Media Plan";
+  const hS=el("div",{style:"font-size:10px;color:#4B5563;margin-top:1px"});
+  const mSp=el("span",{style:`color:${cm?"#38BDF8":"#F59E0B"}`});mSp.textContent=cm?"● Client View  ·  ":"● Agency View  ·  ";
+  hS.appendChild(mSp);hS.appendChild(document.createTextNode(`Round ${state.round.number} · ${state.round.date}`));
+  hTitles.appendChild(hT);hTitles.appendChild(hS);hL.appendChild(logo);hL.appendChild(hTitles);
+
+  const hR=el("div",{style:"display:flex;align-items:center;gap:12px"});
+  [{label:"Total",val:stats.total,c:"#9CA3AF"},{label:"Uploaded",val:stats.uploaded,c:"#38BDF8"},{label:"Approved",val:stats.approved,c:"#4ADE80"}].forEach(s=>{
+    const d=el("div",{style:"text-align:center"});
+    const n=el("div",{style:`font-size:20px;font-weight:700;color:${s.c};line-height:1`});n.textContent=s.val;
+    const l=el("div",{style:"font-size:9px;color:#4B5563;margin-top:1px;text-transform:uppercase;letter-spacing:0.06em"});l.textContent=s.label;
+    d.appendChild(n);d.appendChild(l);hR.appendChild(d);
+  });
+  const toggleBtn=el("button",{style:`font-size:11px;padding:7px 14px;border-radius:8px;border:none;font-weight:600;background:${cm?"#0C2A3F":"#1A2A0C"};color:${cm?"#38BDF8":"#4ADE80"}`});
+  toggleBtn.textContent=cm?"↩ Agency View":"👁 Preview Client View";
+  toggleBtn.onclick=()=>{state.clientMode=!state.clientMode;state.commentOpen=null;render();};
+  hR.appendChild(toggleBtn);
+  hdr.appendChild(hL);hdr.appendChild(hR);
+  document.body.appendChild(hdr);
+
+  // Client banner
+  if(cm){
+    const banner=el("div",{style:"background:#0C1A2E;border-bottom:1px solid #1E3A5F;padding:10px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px"});
+    const bL=el("div",{style:"display:flex;align-items:center;gap:10px"});
+    const bT=el("span",{style:"font-size:12px;color:#38BDF8;font-weight:600"});bT.textContent=`Creative Review — Round ${state.round.number}`;
+    const bS=el("span",{style:"font-size:11px;color:#4B5563"});bS.textContent="Review each asset · click Approve or Revise · add notes · then hit Submit Feedback";
+    bL.appendChild(bT);bL.appendChild(bS);
+    // Submit feedback button — prominent in client mode
+    const submitBtn=el("button",{style:"font-size:12px;padding:8px 18px;border-radius:8px;border:none;font-weight:700;background:linear-gradient(135deg,#1E3A5F,#0C2A40);color:#38BDF8;display:flex;align-items:center;gap:7px;flex-shrink:0;border:1px solid #1E3A5F"});
+    submitBtn.innerHTML="📋 Submit Feedback";
+    submitBtn.onclick=()=>{state.showFeedbackModal=true;renderModal();};
+    const bDate=el("div",{style:"font-size:10px;color:#1E3A5F"});bDate.textContent=`Prepared by PB& · ${state.round.date}`;
+    banner.appendChild(bL);banner.appendChild(submitBtn);
+    document.body.appendChild(banner);
+  }
+
+  // Body
+  const body=el("div",{style:`display:flex;flex:1;overflow:hidden;height:calc(100vh - ${cm?"92px":"54px"})`});
+
+  // Sidebar
+  const sb=el("div",{style:"width:205px;background:#0B0B14;border-right:1px solid #1A1A2A;overflow-y:auto;flex-shrink:0"});
+  const sbH=el("div",{style:"padding:12px 14px 4px;font-size:9px;color:#374151;font-weight:700;letter-spacing:0.1em;text-transform:uppercase"});sbH.textContent="Partners / Platforms";sb.appendChild(sbH);
+  state.plan.forEach(pp=>{
+    const{total,done,approved}=partnerProgress(pp);
+    const isActive=pp.id===state.selectedId;
+    const row=el("div",{style:`padding:9px 14px;cursor:pointer;border-left:3px solid ${isActive?pp.color:"transparent"};background:${isActive?"#14142A":"transparent"}`});
+    const rT=el("div",{style:"display:flex;align-items:center;gap:7px"});
+    const ic=el("span",{style:"font-size:13px"});ic.textContent=pp.icon;
+    const nm=el("span",{style:`font-size:11px;font-weight:${isActive?600:400};color:${isActive?"#fff":"#6B7280"}`});nm.textContent=pp.partner;
+    rT.appendChild(ic);rT.appendChild(nm);
+    const rB=el("div",{style:"margin-top:5px;display:flex;gap:5px;align-items:center"});
+    const track=el("div",{style:"height:3px;flex:1;background:#1A1A2A;border-radius:2px;overflow:hidden"});
+    const fill=el("div",{style:`height:100%;width:${total?(done/total)*100:0}%;background:${pp.color};opacity:0.7`});
+    track.appendChild(fill);
+    const cnt=el("span",{style:"font-size:9px;color:#374151"});cnt.textContent=`${approved}/${total}`;
+    rB.appendChild(track);rB.appendChild(cnt);
+    row.appendChild(rT);row.appendChild(rB);
+    row.onclick=()=>{state.selectedId=pp.id;state.productFilter="all";state.commentOpen=null;render();};
+    sb.appendChild(row);
+  });
+  body.appendChild(sb);
+
+  // Main
+  const main=el("div",{style:"flex:1;overflow-y:auto;padding:20px"});
+
+  // Partner header
+  const ph=el("div",{style:`margin-bottom:16px;padding:14px 18px;background:#0E0E18;border-radius:12px;border:1px solid ${p.color}22`});
+  const phI=el("div",{style:"display:flex;align-items:flex-start;justify-content:space-between;gap:16px"});
+  const phL=el("div",{style:"flex:1"});
+  const phN=el("div",{style:"display:flex;align-items:center;gap:10px;margin-bottom:4px"});
+  const phIco=el("span",{style:"font-size:20px"});phIco.textContent=p.icon;
+  const phTi=el("span",{style:`font-size:17px;font-weight:700;color:${p.color}`});phTi.textContent=p.partner;
+  phN.appendChild(phIco);phN.appendChild(phTi);
+  const phD=el("div",{style:"font-size:11px;color:#9CA3AF;margin-bottom:6px"});phD.textContent=p.description;
+  const phM=el("div",{style:"display:flex;gap:16px;flex-wrap:wrap"});
+  [{label:"✦ Flight",field:"flight"},{label:"📈 Impressions",field:"impressions"},{label:"💰 Investment",field:"investment"}].forEach(({label,field})=>{
+    const s=el("span",{style:"font-size:11px;color:#6B7280"});s.textContent=`${label}: `;
+    const v=el("span",{style:"color:#9CA3AF;border-bottom:1px dashed #3B3B5A;cursor:text"});v.textContent=p[field];
+    if(!cm){v.onclick=()=>inlineEdit(v,p[field],val=>{const i=state.plan.findIndex(x=>x.id===state.selectedId);state.plan[i][field]=val;render();});}
+    s.appendChild(v);phM.appendChild(s);
+  });
+  phL.appendChild(phN);phL.appendChild(phD);phL.appendChild(phM);
+  if(!cm){const hint=el("div",{style:"font-size:9px;color:#374151;margin-top:5px"});hint.textContent="✏️ Click any value to edit";phL.appendChild(hint);}
+  const phR=el("div",{style:"min-width:155px"});
+  const auH=el("div",{style:"font-size:9px;color:#374151;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:5px"});auH.textContent="Audiences";phR.appendChild(auH);
+  p.adSets.forEach((a,i)=>{
+    const as=el("div",{style:"font-size:10px;color:#9CA3AF;background:#14142A;border-radius:5px;padding:3px 8px;margin-bottom:3px"});
+    if(!cm){as.style.borderBottom="1px dashed #3B3B5A";as.style.cursor="text";as.onclick=()=>inlineEdit(as,a,val=>{const idx=state.plan.findIndex(x=>x.id===state.selectedId);state.plan[idx].adSets[i]=val;render();});}
+    as.textContent=a;phR.appendChild(as);
+  });
+  phI.appendChild(phL);phI.appendChild(phR);ph.appendChild(phI);main.appendChild(ph);
+
+  // Filter
+  const fb=el("div",{style:"margin-bottom:14px;display:flex;gap:6px;flex-wrap:wrap;align-items:center"});
+  const fl=el("span",{style:"font-size:9px;color:#374151;text-transform:uppercase;letter-spacing:0.08em;font-weight:700"});fl.textContent="Filter:";fb.appendChild(fl);
+  allProducts().forEach(prod=>{
+    const active=state.productFilter===prod;
+    const btn=el("button",{style:`font-size:10px;padding:4px 10px;border-radius:20px;border:none;font-weight:${active?600:400};background:${active?p.color:"#1A1A2A"};color:${active?"#fff":"#6B7280"}`});
+    btn.textContent=prod==="all"?"All Products":prod;
+    btn.onclick=()=>{state.productFilter=prod;render();};
+    fb.appendChild(btn);
+  });
+  main.appendChild(fb);
+
+  // Placements
+  p.placements.forEach(pl=>{
+    const filtered=pl.creatives.filter(c=>state.productFilter==="all"||c.product===state.productFilter);
+    if(!filtered.length)return;
+    const plA=pl.creatives.filter(c=>state.creatives[c.id]?.status==="approved").length;
+    const plW=el("div",{style:"margin-bottom:16px;background:#0E0E18;border-radius:12px;border:1px solid #1A1A2A;overflow:hidden"});
+    const plH=el("div",{style:"padding:10px 16px;background:#111120;border-bottom:1px solid #1A1A2A;display:flex;align-items:center;justify-content:space-between"});
+    const plHL=el("div");
+    const plHT=el("div",{style:"display:flex;align-items:center;gap:8px"});
+    const plBar=el("div",{style:`width:3px;height:13px;background:${p.color};border-radius:2px`});
+    const plNm=el("span",{style:"font-weight:600;font-size:13px"});plNm.textContent=pl.name;
+    plHT.appendChild(plBar);plHT.appendChild(plNm);
+    if(pl.rotation){const rot=el("span",{style:"font-size:9px;padding:2px 6px;background:#1E1E3A;color:#818CF8;border-radius:4px;font-weight:600"});rot.textContent="ROTATION";plHT.appendChild(rot);}
+    const plSub=el("div",{style:"font-size:10px;color:#374151;margin-top:2px;padding-left:11px"});plSub.textContent=`📐 ${pl.format}   📏 ${pl.specs}`;
+    plHL.appendChild(plHT);plHL.appendChild(plSub);
+    const plCnt=el("span",{style:"font-size:10px;color:#374151"});plCnt.textContent=`${plA}/${pl.creatives.length} approved`;
+    plH.appendChild(plHL);plH.appendChild(plCnt);plW.appendChild(plH);
+
+    const grid=el("div",{style:"padding:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:12px"});
+    filtered.forEach(c=>{
+      const cr=state.creatives[c.id];
+      const sc=STATUS[cr.status];
+      const isNA=cr.status==="n/a";
+      const card=el("div",{style:`background:#0A0A14;border-radius:10px;border:1px solid ${cr.status==="approved"?"#16A34A33":cr.status==="revision"?"#DC262633":"#1A1A2A"};overflow:hidden`});
+
+      // Preview
+      const prev=el("div",{style:"height:144px;background:#111120;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden"});
+      if(cr.fileUrl){
+        if(cr.fileType?.startsWith("image")){const img=el("img",{style:"max-width:100%;max-height:100%;object-fit:contain"});img.src=cr.fileUrl;prev.appendChild(img);}
+        else if(cr.fileType?.startsWith("video")){const vid=el("video",{style:"max-width:100%;max-height:100%;object-fit:contain",controls:true});vid.src=cr.fileUrl;prev.appendChild(vid);}
+        else if(cr.fileType==="application/pdf"){
+          const pd=el("div",{style:"text-align:center;color:#9CA3AF"});
+          const pi=el("div",{style:"font-size:30px"});pi.textContent="📑";
+          const pn=el("div",{style:"font-size:10px;margin-top:4px"});pn.textContent=cr.fileName;
+          const pa=el("a",{href:cr.fileUrl,target:"_blank",style:"font-size:10px;color:#38BDF8;display:block;margin-top:4px"});pa.textContent="View PDF ↗";
+          pd.appendChild(pi);pd.appendChild(pn);pd.appendChild(pa);prev.appendChild(pd);
+        } else {
+          const fd=el("div",{style:"text-align:center;color:#9CA3AF"});
+          const fi=el("div",{style:"font-size:30px"});fi.textContent="📄";
+          const fn2=el("div",{style:"font-size:10px;margin-top:4px"});fn2.textContent=cr.fileName;
+          fd.appendChild(fi);fd.appendChild(fn2);prev.appendChild(fd);
+        }
+      } else {
+        const ph2=el("div",{style:"text-align:center;color:#2D2D3A"});
+        const pi=el("div",{style:"font-size:24px;margin-bottom:4px"});pi.textContent=isNA?"🎯":"🖼️";
+        const pt=el("div",{style:"font-size:10px"});pt.textContent=isNA?"Data layer — no asset":cm?"Asset coming soon":"No asset uploaded yet";
+        ph2.appendChild(pi);ph2.appendChild(pt);prev.appendChild(ph2);
+      }
+      const badge=el("div",{style:`position:absolute;top:7px;right:7px;font-size:9px;font-weight:600;padding:2px 7px;border-radius:10px;background:${sc.bg};color:${sc.color}`});badge.textContent=sc.label;
+      const vb=el("div",{style:`position:absolute;top:7px;left:7px;font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:${p.color}25;color:${p.color}`});vb.textContent=c.version;
+      prev.appendChild(badge);prev.appendChild(vb);card.appendChild(prev);
+
+      // Body
+      const cbody=el("div",{style:"padding:10px"});
+      const cprod=el("div",{style:"font-size:11px;font-weight:600;color:#E5E7EB;line-height:1.3;margin-bottom:8px"});cprod.textContent=c.product;cbody.appendChild(cprod);
+      if(cr.agencyNote){const an=el("div",{style:`font-size:10px;color:#6B7280;background:#111120;border-radius:6px;padding:5px 8px;margin-bottom:6px;border-left:2px solid ${p.color}55`});an.textContent="📌 "+cr.agencyNote;cbody.appendChild(an);}
+      if(cr.comment){const cn=el("div",{style:"font-size:10px;color:#9CA3AF;background:#0C1A2E;border-radius:6px;padding:5px 8px;margin-bottom:6px;border-left:2px solid #1E3A5F"});cn.textContent="💬 "+cr.comment;cbody.appendChild(cn);}
+
+      if(!isNA){
+        const acts=el("div",{style:"display:flex;flex-direction:column;gap:5px"});
+        if(cr.fileUrl){
+          const ar=el("div",{style:"display:flex;gap:4px"});
+          const appB=el("button",{style:`flex:1;font-size:10px;padding:6px 0;background:${cr.status==="approved"?"#16A34A":"#0C2A1A"};border:1px solid ${cr.status==="approved"?"#16A34A":"#1A3A1A"};border-radius:6px;color:${cr.status==="approved"?"#fff":"#4ADE80"};font-weight:600`});
+          appB.textContent="✓ Approve";appB.onclick=()=>{state.creatives[c.id].status="approved";render();};
+          const revB=el("button",{style:`flex:1;font-size:10px;padding:6px 0;background:${cr.status==="revision"?"#DC2626":"#2A0C0C"};border:1px solid ${cr.status==="revision"?"#DC2626":"#3A1A1A"};border-radius:6px;color:${cr.status==="revision"?"#fff":"#F87171"};font-weight:600`});
+          revB.textContent="✗ Revise";revB.onclick=()=>{state.creatives[c.id].status="revision";render();};
+          ar.appendChild(appB);ar.appendChild(revB);acts.appendChild(ar);
+
+          if(state.commentOpen===c.id+"_client"){
+            const ta=el("textarea",{style:"width:100%;font-size:10px;background:#111120;border:1px solid #2D2D4A;border-radius:6px;color:#E5E7EB;padding:6px 8px;resize:vertical;min-height:60px;outline:none"});
+            ta.placeholder="Add your revision notes here...";ta.value=state.commentDraft;ta.oninput=e=>state.commentDraft=e.target.value;
+            const bR=el("div",{style:"display:flex;gap:4px;margin-top:4px"});
+            const sB=el("button",{style:"flex:1;font-size:10px;padding:5px 0;background:#0C2240;border:1px solid #1E3A5F;border-radius:6px;color:#38BDF8;font-weight:600"});
+            sB.textContent="Save Note";sB.onclick=()=>{state.creatives[c.id].comment=state.commentDraft;state.commentOpen=null;state.commentDraft="";render();};
+            const cB=el("button",{style:"font-size:10px;padding:5px 8px;background:#111120;border:1px solid #1A1A2A;border-radius:6px;color:#4B5563"});
+            cB.textContent="Cancel";cB.onclick=()=>{state.commentOpen=null;render();};
+            bR.appendChild(sB);bR.appendChild(cB);acts.appendChild(ta);acts.appendChild(bR);
+          } else {
+            const cfB=el("button",{style:"font-size:10px;padding:5px 0;background:#0C1A2E;border:1px solid #1E2A3A;border-radius:6px;color:#4B7BAA;width:100%"});
+            cfB.textContent=cr.comment?"💬 Edit Note":"💬 Add Note";
+            cfB.onclick=()=>{state.commentOpen=c.id+"_client";state.commentDraft=cr.comment||"";render();};
+            acts.appendChild(cfB);
+          }
+        }
+
+        // Agency controls
+        if(!cm){
+          const div=el("div",{style:"border-top:1px solid #1A1A2A;margin-top:4px;padding-top:8px"});
+          const albl=el("div",{style:"font-size:9px;color:#2D2D4A;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:6px"});albl.textContent="Agency Controls";div.appendChild(albl);
+          if(!cr.fileUrl){
+            const inp=el("input",{type:"file"});inp.style.display="none";
+            inp.onchange=e=>{const f=e.target.files[0];if(!f)return;const url=URL.createObjectURL(f);state.creatives[c.id]={...state.creatives[c.id],fileUrl:url,fileType:f.type,fileName:f.name,status:"uploaded"};render();};
+            const upB=el("button",{style:"font-size:10px;padding:6px 0;background:#14142A;border:1px dashed #2D2D4A;border-radius:6px;color:#6B7280;width:100%;margin-bottom:5px"});
+            upB.textContent="⬆ Upload Asset";upB.onclick=()=>inp.click();div.appendChild(inp);div.appendChild(upB);
+          } else if(state.replaceOpen===c.id){
+            const inp2=el("input",{type:"file"});inp2.style.display="none";
+            inp2.onchange=e=>{const f=e.target.files[0];if(!f)return;const url=URL.createObjectURL(f);state.creatives[c.id]={...state.creatives[c.id],fileUrl:url,fileType:f.type,fileName:f.name,status:"uploaded"};state.replaceOpen=null;render();};
+            const rR=el("div",{style:"display:flex;gap:4px;margin-bottom:5px"});
+            const chB=el("button",{style:"flex:1;font-size:10px;padding:5px 0;background:#0C2240;border:1px solid #1E3A5F;border-radius:6px;color:#38BDF8"});chB.textContent="Choose File";chB.onclick=()=>inp2.click();
+            const caR=el("button",{style:"font-size:10px;padding:5px 8px;background:#111120;border:1px solid #1A1A2A;border-radius:6px;color:#4B5563"});caR.textContent="Cancel";caR.onclick=()=>{state.replaceOpen=null;render();};
+            rR.appendChild(chB);rR.appendChild(caR);div.appendChild(inp2);div.appendChild(rR);
+          } else {
+            const repB=el("button",{style:"font-size:10px;padding:5px 0;background:#111120;border:1px dashed #2D2D4A;border-radius:6px;color:#374151;width:100%;margin-bottom:5px"});
+            repB.textContent="↺ Upload Replacement";repB.onclick=()=>{state.replaceOpen=c.id;render();};div.appendChild(repB);
+          }
+          if(state.commentOpen===c.id+"_agency"){
+            const ta2=el("textarea",{style:"width:100%;font-size:10px;background:#111120;border:1px solid #2D2D4A;border-radius:6px;color:#E5E7EB;padding:6px 8px;resize:vertical;min-height:52px;outline:none"});
+            ta2.placeholder="Add context note for client...";ta2.value=state.commentDraft;ta2.oninput=e=>state.commentDraft=e.target.value;
+            const bR2=el("div",{style:"display:flex;gap:4px;margin-top:4px"});
+            const sB2=el("button",{style:"flex:1;font-size:10px;padding:5px 0;background:#1A2A0C;border:1px solid #2A3A1A;border-radius:6px;color:#4ADE80;font-weight:600"});sB2.textContent="Save Note";sB2.onclick=()=>{state.creatives[c.id].agencyNote=state.commentDraft;state.commentOpen=null;state.commentDraft="";render();};
+            const cB2=el("button",{style:"font-size:10px;padding:5px 8px;background:#111120;border:1px solid #1A1A2A;border-radius:6px;color:#4B5563"});cB2.textContent="Cancel";cB2.onclick=()=>{state.commentOpen=null;render();};
+            bR2.appendChild(sB2);bR2.appendChild(cB2);div.appendChild(ta2);div.appendChild(bR2);
+          } else {
+            const anB=el("button",{style:"font-size:10px;padding:5px 0;background:#111120;border:1px solid #1A1A2A;border-radius:6px;color:#374151;width:100%"});
+            anB.textContent=cr.agencyNote?"📌 Edit Agency Note":"📌 Add Agency Note";anB.onclick=()=>{state.commentOpen=c.id+"_agency";state.commentDraft=cr.agencyNote||"";render();};div.appendChild(anB);
+          }
+          acts.appendChild(div);
+        }
+        cbody.appendChild(acts);
+      }
+      card.appendChild(cbody);grid.appendChild(card);
+    });
+    plW.appendChild(grid);main.appendChild(plW);
+  });
+  body.appendChild(main);
+  document.body.appendChild(body);
+  renderModal();
+}
+
+render();
+</script>
+</body>
+</html>
