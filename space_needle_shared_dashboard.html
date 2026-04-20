@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- saved from url=(0086)https://approvalpage.github.io/SN-WeeklyPerformance/space_needle_shared_dashboard.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Space Needle — Weekly Performance Dashboard</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -113,26 +113,26 @@
 
   <div class="share-bar">
     <div class="share-label">
-      <strong>Team handoff</strong> &mdash; edit your section, hit Export, send the .json to a teammate, they Import it.
+      <strong>Team handoff</strong> — edit your section, hit Export, send the .json to a teammate, they Import it.
     </div>
     <div class="share-btns">
-      <button class="xbtn primary" onclick="exportData()">&#8595; Export (.json)</button>
-      <button class="xbtn" onclick="document.getElementById('import-file').click()">&#8593; Import file</button>
-      <input type="file" id="import-file" accept=".json" onchange="importFile(this)" />
+      <button class="xbtn primary" onclick="exportData()">↓ Export (.json)</button>
+      <button class="xbtn" onclick="document.getElementById(&#39;import-file&#39;).click()">↑ Import file</button>
+      <input type="file" id="import-file" accept=".json" onchange="importFile(this)">
       <button class="xbtn" onclick="openPasteModal()">Paste JSON</button>
     </div>
   </div>
 
   <div class="top-bar">
     <div>
-      <div class="dash-title">Space Needle &mdash; weekly performance</div>
+      <div class="dash-title">Space Needle — weekly performance</div>
       <div class="week-row">
         <span class="week-label">Week of</span>
-        <input class="week-input" id="week-date" type="text" value="Apr 14 &ndash; Apr 20, 2026" />
+        <input class="week-input" id="week-date" type="text" value="Apr 14 – Apr 20, 2026">
       </div>
     </div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-      <span class="sync-status" id="sync-status"></span>
+      <span class="sync-status" id="sync-status">Local draft loaded</span>
       <button class="xbtn" onclick="saveDraft()">Save draft</button>
     </div>
   </div>
@@ -140,23 +140,19 @@
   <div class="metrics-grid">
     <div class="metric-card">
       <div class="metric-label">Total ticket sales</div>
-      <input class="metric-val" id="m0" value="4,820" />
-      <div class="metric-sub up" id="ms0">&#8593; 12% vs last week</div>
+      <input class="metric-val" id="m0" value="4,820">
     </div>
     <div class="metric-card">
       <div class="metric-label">eCPA</div>
-      <input class="metric-val" id="m1" value="$6.40" />
-      <div class="metric-sub up" id="ms1">&#8595; $0.80 vs last week</div>
+      <input class="metric-val" id="m1" value="$6.40">
     </div>
     <div class="metric-card">
       <div class="metric-label">Revenue</div>
-      <input class="metric-val" id="m2" value="$96,400" />
-      <div class="metric-sub neutral" id="ms2">vs $86,200 prior week</div>
+      <input class="metric-val" id="m2" value="$96,400">
     </div>
     <div class="metric-card">
       <div class="metric-label">Conversion rate</div>
-      <input class="metric-val" id="m3" value="3.2%" />
-      <div class="metric-sub down" id="ms3">&#8595; 0.3pts vs last week</div>
+      <input class="metric-val" id="m3" value="3.2%">
     </div>
   </div>
 
@@ -168,30 +164,30 @@
 
   <div class="section">
     <div class="sec-title">What's working</div>
-    <div id="list-working"></div>
-    <button class="add-btn" onclick="addItem('working','green')">+ add item</button>
+    <div id="list-working"><div class="item-row"><span class="dot dot-mt dg" id="dot-working-0"></span><textarea class="item-text" rows="1" style="height: 22px;"></textarea><select class="status-sel"><option value="green" selected="">Green</option><option value="yellow">Yellow</option><option value="red">Red</option></select><button class="del-btn" title="Remove">✕</button></div><div class="item-row"><span class="dot dot-mt dg" id="dot-working-1"></span><textarea class="item-text" rows="1" style="height: 22px;"></textarea><select class="status-sel"><option value="green" selected="">Green</option><option value="yellow">Yellow</option><option value="red">Red</option></select><button class="del-btn" title="Remove">✕</button></div><div class="item-row"><span class="dot dot-mt dg" id="dot-working-2"></span><textarea class="item-text" rows="1" style="height: 22px;"></textarea><select class="status-sel"><option value="green" selected="">Green</option><option value="yellow">Yellow</option><option value="red">Red</option></select><button class="del-btn" title="Remove">✕</button></div></div>
+    <button class="add-btn" onclick="addItem(&#39;working&#39;,&#39;green&#39;)">+ add item</button>
   </div>
   <div class="section">
     <div class="sec-title">Key learnings</div>
-    <div id="list-learnings"></div>
-    <button class="add-btn" onclick="addItem('learnings','yellow')">+ add item</button>
+    <div id="list-learnings"><div class="item-row"><span class="dot dot-mt dg" id="dot-learnings-0"></span><textarea class="item-text" rows="1" style="height: 22px;"></textarea><select class="status-sel"><option value="green" selected="">Green</option><option value="yellow">Yellow</option><option value="red">Red</option></select><button class="del-btn" title="Remove">✕</button></div><div class="item-row"><span class="dot dot-mt dg" id="dot-learnings-1"></span><textarea class="item-text" rows="1" style="height: 22px;"></textarea><select class="status-sel"><option value="green" selected="">Green</option><option value="yellow">Yellow</option><option value="red">Red</option></select><button class="del-btn" title="Remove">✕</button></div><div class="item-row"><span class="dot dot-mt dg" id="dot-learnings-2"></span><textarea class="item-text" rows="1" style="height: 22px;"></textarea><select class="status-sel"><option value="green" selected="">Green</option><option value="yellow">Yellow</option><option value="red">Red</option></select><button class="del-btn" title="Remove">✕</button></div></div>
+    <button class="add-btn" onclick="addItem(&#39;learnings&#39;,&#39;yellow&#39;)">+ add item</button>
   </div>
   <div class="section">
     <div class="sec-title">Changes for next week</div>
-    <div id="list-changes"></div>
-    <button class="add-btn" onclick="addItem('changes','yellow')">+ add item</button>
+    <div id="list-changes"><div class="item-row"><span class="dot dot-mt dg" id="dot-changes-0"></span><textarea class="item-text" rows="1" style="height: 22px;"></textarea><select class="status-sel"><option value="green" selected="">Green</option><option value="yellow">Yellow</option><option value="red">Red</option></select><button class="del-btn" title="Remove">✕</button></div><div class="item-row"><span class="dot dot-mt dg" id="dot-changes-1"></span><textarea class="item-text" rows="1" style="height: 22px;"></textarea><select class="status-sel"><option value="green" selected="">Green</option><option value="yellow">Yellow</option><option value="red">Red</option></select><button class="del-btn" title="Remove">✕</button></div><div class="item-row"><span class="dot dot-mt dg" id="dot-changes-2"></span><textarea class="item-text" rows="1" style="height: 22px;"></textarea><select class="status-sel"><option value="green" selected="">Green</option><option value="yellow">Yellow</option><option value="red">Red</option></select><button class="del-btn" title="Remove">✕</button></div></div>
+    <button class="add-btn" onclick="addItem(&#39;changes&#39;,&#39;yellow&#39;)">+ add item</button>
   </div>
 
 </div>
 
-<div class="footer">Export each Monday &mdash; import to load a teammate's update</div>
+<div class="footer">Export each Monday — import to load a teammate's update</div>
 </div>
 
 <div class="modal-overlay" id="paste-modal">
   <div class="modal">
     <div class="modal-title">Paste JSON update</div>
     <div class="modal-desc">Paste JSON exported by a teammate. This will replace the current dashboard data.</div>
-    <textarea id="paste-input" placeholder='{"week":"Apr 14...","metrics":[...],...}'></textarea>
+    <textarea id="paste-input" placeholder="{&quot;week&quot;:&quot;Apr 14...&quot;,&quot;metrics&quot;:[...],...}"></textarea>
     <div class="modal-err" id="paste-err"></div>
     <div class="modal-btns">
       <button class="xbtn" onclick="closePasteModal()">Cancel</button>
@@ -359,5 +355,6 @@ function confirmPaste(){
   applyState();
 })();
 </script>
-</body>
-</html>
+
+
+</body></html>
